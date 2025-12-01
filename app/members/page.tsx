@@ -194,12 +194,19 @@ const PurchaseModal = ({ isOpen, closeModal, tier }) => {
             <div 
                 className="bg-neutral-900 border border-red-700/50 rounded-xl w-full max-w-lg shadow-2xl p-6 md:p-8 transform transition-transform duration-300 scale-100"
                 onClick={(e) => e.stopPropagation()} 
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="modal-title"
             >
                 <div className="flex justify-between items-start mb-6 border-b border-neutral-800 pb-4">
-                    <h2 className={`text-3xl font-bold ${isEnterprise ? 'text-red-500' : 'text-white'}`}>
+                    <h2 id="modal-title" className={`text-3xl font-bold ${isEnterprise ? 'text-red-500' : 'text-white'}`}>
                         {isEnterprise ? `Contact for ${tier.name}` : `Upgrade to ${tier.name}`}
                     </h2>
-                    <button onClick={closeModal} className="text-neutral-500 hover:text-red-500 transition-colors">
+                    <button 
+                        onClick={closeModal} 
+                        className="text-neutral-500 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-neutral-800"
+                        aria-label="Close modal"
+                    >
                         <XIcon />
                     </button>
                 </div>
@@ -290,8 +297,22 @@ const PricingCard = ({ tier, openModal }) => {
         <div
             className={`
                 bg-neutral-950/70 border rounded-xl shadow-2xl transition-all duration-300 p-6 md:p-8 h-full flex flex-col
-                ${tier.highlight ? 'border-red-700/80 shadow-[0_0_20px_rgba(220,38,38,0.2)]' : 'border-neutral-900'}
+                
+                ${tier.highlight 
+                    ? 'border-red-700/80 shadow-[0_0_20px_rgba(220,38,38,0.2)]' // Highlighted (Recommended)
+                    : 'border-neutral-900'
+                }
+                
+                /* Hover/Focus Styles for Visual Feedback */
+                hover:border-red-500/80 hover:shadow-[0_0_30px_rgba(220,38,38,0.3)] 
+                hover:scale-[1.01]
+                focus-within:border-red-500/80 focus-within:shadow-[0_0_30px_rgba(220,38,38,0.3)]
+                focus-within:scale-[1.01]
             `}
+            // Make the entire card focusable to handle keyboard navigation highlighting
+            tabIndex={0} 
+            role="region" 
+            aria-labelledby={`tier-name-${tier.id}`}
         >
             {/* Header Area */}
             <div className="flex-shrink-0">
@@ -305,7 +326,7 @@ const PricingCard = ({ tier, openModal }) => {
                 
                 <div className="flex justify-between items-start mb-4">
                     <div>
-                        <h2 className="text-3xl font-bold text-white tracking-tight">{tier.name}</h2>
+                        <h2 id={`tier-name-${tier.id}`} className="text-3xl font-bold text-white tracking-tight">{tier.name}</h2>
                         <p className="text-sm text-neutral-400 mt-1">{tier.blurb}</p>
                     </div>
                     <div className="text-right flex-shrink-0">
@@ -378,8 +399,11 @@ export default function App() {
     const [selectedTierId, setSelectedTierId] = useState<TierKey | null>(null);
 
     const openModal = (tierId: TierKey) => {
-        setSelectedTierId(tierId);
-        setIsModalOpen(true);
+        // Prevent opening modal for the free 'access' tier
+        if (tierId !== 'access') {
+            setSelectedTierId(tierId);
+            setIsModalOpen(true);
+        }
     };
 
     const closeModal = () => {
@@ -417,7 +441,7 @@ export default function App() {
                                 <div className="flex flex-col leading-tight">
                                     <span className="text-neutral-200">Current Plan: {currentStatus.name}</span>
                                     <span className="text-neutral-500">
-                                        Last renewal: October 2024
+                                        Last renewal: October 2025
                                     </span>
                                 </div>
                             </div>
